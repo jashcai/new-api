@@ -26,24 +26,24 @@ export function HowItWorks() {
   const steps = [
     {
       num: '1',
-      title: t('Configure'),
+      title: t('Connect providers'),
       desc: t(
-        'Add your API keys, set up channels and configure access permissions'
+        'Register upstream channels, keep provider credentials internal, and set health rules'
       ),
       icon: <Settings className='size-6' strokeWidth={1.5} />,
     },
     {
       num: '2',
-      title: t('Connect'),
+      title: t('Govern teams'),
       desc: t(
-        'Connect through OpenAI, Claude, Gemini, and other compatible API routes'
+        'Assign model access, default token scopes, quotas, and enterprise sign-in mappings'
       ),
       icon: <Zap className='size-6' strokeWidth={1.5} />,
     },
     {
       num: '3',
-      title: t('Monitor'),
-      desc: t('Track usage, costs and performance with real-time analytics'),
+      title: t('Operate safely'),
+      desc: t('Review usage, costs, audit logs, errors, and routing performance in one console'),
       icon: <BarChart3 className='size-6' strokeWidth={1.5} />,
     },
   ]
@@ -53,10 +53,10 @@ export function HowItWorks() {
       <div className='mx-auto max-w-6xl'>
         <AnimateInView className='mb-16 text-center md:mb-20'>
           <p className='text-muted-foreground mb-3 text-xs font-medium tracking-widest uppercase'>
-            {t('How It Works')}
+            {t('Deployment workflow')}
           </p>
           <h2 className='text-2xl font-bold tracking-tight md:text-3xl'>
-            {t('Three steps to get started')}
+            {t('From provider sprawl to governed access')}
           </h2>
         </AnimateInView>
 

@@ -9,6 +9,7 @@ import (
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/oauth"
+	"github.com/QuantumNous/new-api/service"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -123,7 +124,17 @@ func HandleOAuth(c *gin.Context) {
 		return
 	}
 
-	// 9. Setup login
+	// 9. Sync enterprise SSO attributes if enabled
+	if changed, err := service.SyncEnterpriseSSOUser(user, oauthUser); err != nil {
+		common.ApiError(c, err)
+		return
+	} else if changed {
+		recordUserSecurityAudit(c, user.Id, "enterprise_sso.sync", map[string]interface{}{
+			"group": user.Group,
+		})
+	}
+
+	// 10. Setup login
 	setupLogin(user, c)
 }
 
@@ -261,6 +272,7 @@ func findOrCreateOAuthUser(c *gin.Context, provider oauth.Provider, oauthUser *o
 	}
 	user.Role = common.RoleCommonUser
 	user.Status = common.UserStatusEnabled
+	service.ApplyEnterpriseSSOToNewUser(user, oauthUser)
 
 	// Handle affiliate code
 	affCode := session.Get("aff")

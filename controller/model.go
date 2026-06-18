@@ -179,10 +179,15 @@ func getModelListGroups(c *gin.Context) (modelListGroups, error) {
 	tokenGroup := common.GetContextKeyString(c, constant.ContextKeyTokenGroup)
 	userGroup := common.GetContextKeyString(c, constant.ContextKeyUserGroup)
 	if userGroup == "" && (tokenGroup == "" || tokenGroup == "auto") {
-		var err error
-		userGroup, err = model.GetUserGroup(c.GetInt("id"), false)
-		if err != nil {
-			return modelListGroups{}, err
+		if userId := c.GetInt("id"); userId > 0 {
+			var err error
+			userGroup, err = model.GetUserGroup(userId, false)
+			if err != nil {
+				return modelListGroups{}, err
+			}
+		}
+		if userGroup == "" {
+			userGroup = "default"
 		}
 	}
 
@@ -267,6 +272,7 @@ func ListModels(c *gin.Context, modelType int) {
 			userModelNames = append(userModelNames, modelName)
 		}
 	}
+	userModelNames = service.FilterEnterpriseModelsForGroups(groups.userGroup, ownerGroups, userModelNames)
 
 	ownerByModel := map[string]string{}
 	if len(ownerGroups) > 0 {
@@ -287,6 +293,15 @@ func ListModels(c *gin.Context, modelType int) {
 				DisplayName: model.Id,
 				Type:        "model",
 			}
+		}
+		if len(useranthropicModels) == 0 {
+			c.JSON(200, gin.H{
+				"data":     useranthropicModels,
+				"first_id": "",
+				"has_more": false,
+				"last_id":  "",
+			})
+			return
 		}
 		c.JSON(200, gin.H{
 			"data":     useranthropicModels,

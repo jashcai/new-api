@@ -72,15 +72,16 @@ const ACCENT_CLASSES: Record<
 const API_DEMOS: ApiDemoConfig[] = [
   {
     id: 'gpt-chat',
-    label: 'Chat',
+    label: 'Gateway',
     method: 'POST',
     endpoint: '/v1/chat/completions',
     headers: ['"Authorization: Bearer sk-••••"'],
     request: [
-      '"model": "your-model",',
+      '"model": "approved-gpt-4.1",',
       '"messages": [',
       '  { "role": "user", "content": "..." }',
-      ']',
+      '],',
+      '"metadata": { "team": "R&D" }',
     ],
     response: [
       '{',
@@ -89,17 +90,21 @@ const API_DEMOS: ApiDemoConfig[] = [
       '}',
     ],
     responseHighlights: ['<text>', '<tokens>'],
-    tokens: 27,
+    tokens: 284,
     latency: 142,
     accent: 'emerald',
   },
   {
     id: 'responses',
-    label: 'Responses',
+    label: 'Policy',
     method: 'POST',
     endpoint: '/v1/responses',
     headers: ['"Authorization: Bearer sk-••••"'],
-    request: ['"model": "your-model",', '"input": "..."'],
+    request: [
+      '"model": "finance-approved",',
+      '"input": "...",',
+      '"store": false',
+    ],
     response: [
       '{',
       '  "output": [{ "type": "output_text", "text": <text> }],',
@@ -107,18 +112,18 @@ const API_DEMOS: ApiDemoConfig[] = [
       '}',
     ],
     responseHighlights: ['<text>', '<tokens>'],
-    tokens: 31,
+    tokens: 318,
     latency: 168,
     accent: 'amber',
   },
   {
     id: 'claude',
-    label: 'Claude',
+    label: 'Fallback',
     method: 'POST',
     endpoint: '/v1/messages',
     headers: ['"x-api-key: sk-••••"', '"anthropic-version: 2023-06-01"'],
     request: [
-      '"model": "your-model",',
+      '"model": "claude-routed",',
       '"max_tokens": 1024,',
       '"messages": [',
       '  { "role": "user", "content": "..." }',
@@ -131,13 +136,13 @@ const API_DEMOS: ApiDemoConfig[] = [
       '}',
     ],
     responseHighlights: ['<text>', '<in>', '<out>'],
-    tokens: 29,
+    tokens: 296,
     latency: 156,
     accent: 'blue',
   },
   {
     id: 'gemini',
-    label: 'Gemini',
+    label: 'Audit',
     method: 'POST',
     endpoint: '/v1beta/models/{model}:generateContent',
     headers: ['"x-goog-api-key: sk-••••"'],
@@ -154,7 +159,7 @@ const API_DEMOS: ApiDemoConfig[] = [
       '}',
     ],
     responseHighlights: ['<text>', '<tokens>'],
-    tokens: 25,
+    tokens: 251,
     latency: 93,
     accent: 'violet',
   },
@@ -242,7 +247,7 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
           <div className='ml-auto flex items-center gap-2 pr-2 sm:pr-3'>
             <span className='inline-block size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.45)]' />
             <span className='text-foreground/40 font-mono text-[10px] tracking-wider uppercase'>
-              200 ok
+              policy pass
             </span>
           </div>
         </div>
@@ -300,14 +305,14 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
             </span>
             <span className='bg-foreground/15 size-1 rounded-full' />
             <span className='flex items-center gap-1'>
-              <span className='tracking-wider uppercase'>cost</span>
-              <span className='font-mono'>
+            <span className='tracking-wider uppercase'>cost</span>
+            <span className='font-mono'>
                 ${(demo.tokens * 0.00003).toFixed(5)}
               </span>
             </span>
           </div>
           <span className='text-foreground/30 font-mono text-[10px] tracking-wider uppercase'>
-            stream · sse
+            audit · quota · stream
           </span>
         </div>
       </div>
@@ -447,10 +452,10 @@ function renderResponseLine(line: string, demo: ApiDemoConfig): ReactNode {
 
 function truncateResponse(demo: ApiDemoConfig): string {
   const map: Record<string, string> = {
-    'gpt-chat': 'Chat request routed.',
-    responses: 'Response workflow ready.',
-    claude: 'Claude message routed.',
-    gemini: 'Gemini request served.',
+    'gpt-chat': 'Request routed with team policy.',
+    responses: 'Private response workflow ready.',
+    claude: 'Fallback channel selected.',
+    gemini: 'Audit event recorded.',
   }
   return map[demo.id] ?? '...'
 }

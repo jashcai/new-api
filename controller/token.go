@@ -7,8 +7,10 @@ import (
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +31,10 @@ func buildMaskedTokenResponses(tokens []*model.Token) []*model.Token {
 		maskedTokens = append(maskedTokens, buildMaskedTokenResponse(token))
 	}
 	return maskedTokens
+}
+
+func getCurrentUserGroup(c *gin.Context) string {
+	return common.GetContextKeyString(c, constant.ContextKeyUserGroup)
 }
 
 func GetAllTokens(c *gin.Context) {
@@ -89,6 +95,10 @@ func GetTokenKey(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+	recordUserSecurityAudit(c, userId, "token.key_view", map[string]interface{}{
+		"id":   token.Id,
+		"name": token.Name,
+	})
 	common.ApiSuccess(c, gin.H{
 		"key": token.GetFullKey(),
 	})
@@ -222,11 +232,19 @@ func AddToken(c *gin.Context) {
 		Group:              token.Group,
 		CrossGroupRetry:    token.CrossGroupRetry,
 	}
+	userGroup := getCurrentUserGroup(c)
+	if err = service.ApplyEnterpriseTokenPolicy(&cleanToken, userGroup); err != nil {
+		common.ApiError(c, err)
+		return
+	}
 	err = cleanToken.Insert()
 	if err != nil {
 		common.ApiError(c, err)
 		return
 	}
+	recordUserSecurityAudit(c, c.GetInt("id"), "token.create", map[string]interface{}{
+		"name": cleanToken.Name,
+	})
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -241,6 +259,9 @@ func DeleteToken(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+	recordUserSecurityAudit(c, userId, "token.delete", map[string]interface{}{
+		"id": id,
+	})
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -299,11 +320,22 @@ func UpdateToken(c *gin.Context) {
 		cleanToken.AllowIps = token.AllowIps
 		cleanToken.Group = token.Group
 		cleanToken.CrossGroupRetry = token.CrossGroupRetry
+		userGroup := getCurrentUserGroup(c)
+		if err = service.ApplyEnterpriseTokenPolicy(cleanToken, userGroup); err != nil {
+			common.ApiError(c, err)
+			return
+		}
 	}
 	err = cleanToken.Update()
 	if err != nil {
 		common.ApiError(c, err)
 		return
+	}
+	if statusOnly == "" {
+		recordUserSecurityAudit(c, userId, "token.update", map[string]interface{}{
+			"id":   cleanToken.Id,
+			"name": cleanToken.Name,
+		})
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -328,6 +360,9 @@ func DeleteTokenBatch(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+	recordUserSecurityAudit(c, userId, "token.delete_batch", map[string]interface{}{
+		"count": count,
+	})
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -355,5 +390,8 @@ func GetTokenKeysBatch(c *gin.Context) {
 	for _, t := range tokens {
 		keysMap[t.Id] = t.GetFullKey()
 	}
+	recordUserSecurityAudit(c, userId, "token.keys_view", map[string]interface{}{
+		"count": len(tokens),
+	})
 	common.ApiSuccess(c, gin.H{"keys": keysMap})
 }

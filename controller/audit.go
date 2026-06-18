@@ -46,6 +46,15 @@ var auditContentTemplates = map[string]string{
 	"channel.upstream_apply_all": "Applied upstream model changes to ${count} channels",
 
 	"redemption.create": "Created ${count} redemption codes named ${name} (${quota} each)",
+
+	"token.create":       "Created token ${name}",
+	"token.update":       "Updated token ${name} (ID: ${id})",
+	"token.delete":       "Deleted token (ID: ${id})",
+	"token.delete_batch": "Batch deleted ${count} tokens",
+	"token.key_view":     "Viewed token key ${name} (ID: ${id})",
+	"token.keys_view":    "Viewed ${count} token keys",
+
+	"enterprise_sso.sync": "Synchronized enterprise SSO attributes for user group ${group}",
 }
 
 // auditContentEN 按 action 模板渲染英文兜底文本；未登记的 action 退回 action 本身。

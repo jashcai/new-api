@@ -98,10 +98,10 @@ export function Stats(_props: StatsProps) {
   const { t } = useTranslation()
 
   const stats: StatItem[] = [
-    { end: 50, suffix: '+', label: t('upstream services integrated') },
-    { end: 100, suffix: '+', label: t('model billing support') },
-    { end: 50, suffix: '+', label: t('compatible API routes') },
-    { end: 10, suffix: '+', label: t('scheduling controls') },
+    { end: 40, suffix: '+', label: t('upstream providers unified') },
+    { end: 100, suffix: '+', label: t('models governed by policy') },
+    { end: 12, suffix: '+', label: t('compatible enterprise routes') },
+    { end: 24, suffix: '/7', label: t('operations visibility') },
   ]
 
   return (
@@ -111,12 +111,12 @@ export function Stats(_props: StatsProps) {
           {stats.map((s) => (
             <div
               key={s.label}
-              className='flex flex-col items-center text-center'
+              className='flex flex-col items-center text-center md:items-start md:text-left'
             >
-              <span className='text-2xl font-bold tracking-tight md:text-3xl'>
+              <span className='text-2xl font-bold tracking-tight text-foreground md:text-3xl'>
                 <Counter end={s.end} suffix={s.suffix} decimals={s.decimals} />
               </span>
-              <span className='text-muted-foreground mt-1.5 text-xs'>
+              <span className='text-muted-foreground mt-1.5 text-xs leading-relaxed'>
                 {s.label}
               </span>
             </div>

@@ -39,14 +39,14 @@ const StatsCards = ({
           <Card
             key={idx}
             {...CARD_PROPS}
-            className={`${group.color} border-0 !rounded-2xl w-full`}
+            className={`classic-dashboard-card ${group.color} border-0 !rounded-2xl w-full`}
             title={group.title}
           >
             <div className='space-y-4'>
               {group.items.map((item, itemIdx) => (
                 <div
                   key={itemIdx}
-                  className='flex items-center justify-between cursor-pointer'
+                  className='flex items-center justify-between cursor-pointer rounded-xl px-1 py-1 transition-colors hover:bg-semi-color-fill-0'
                   onClick={item.onClick}
                 >
                   <div className='flex items-center'>

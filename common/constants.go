@@ -112,6 +112,14 @@ var EmailLoginAuthServerList = []string{
 var DebugEnabled bool
 var MemoryCacheEnabled bool
 
+// PrivateDeploymentMode applies conservative defaults for enterprise/private
+// deployments. Database-backed options are still loaded, but public-site
+// features are forced off after option sync.
+var PrivateDeploymentMode bool
+var CORSAllowedOrigins []string
+var CORSAllowedHeaders []string
+var SessionCookieSecure bool
+
 var LogConsumeEnabled = true
 
 var TLSInsecureSkipVerify bool

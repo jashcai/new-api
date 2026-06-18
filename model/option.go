@@ -36,6 +36,7 @@ func InitOptionMap() {
 	common.OptionMap["FileDownloadPermission"] = strconv.Itoa(common.FileDownloadPermission)
 	common.OptionMap["ImageUploadPermission"] = strconv.Itoa(common.ImageUploadPermission)
 	common.OptionMap["ImageDownloadPermission"] = strconv.Itoa(common.ImageDownloadPermission)
+	common.OptionMap["PrivateDeploymentMode"] = strconv.FormatBool(common.PrivateDeploymentMode)
 	common.OptionMap["PasswordLoginEnabled"] = strconv.FormatBool(common.PasswordLoginEnabled)
 	common.OptionMap["PasswordRegisterEnabled"] = strconv.FormatBool(common.PasswordRegisterEnabled)
 	common.OptionMap["EmailVerificationEnabled"] = strconv.FormatBool(common.EmailVerificationEnabled)
@@ -182,6 +183,7 @@ func InitOptionMap() {
 
 	common.OptionMapRWMutex.Unlock()
 	loadOptionsFromDatabase()
+	applyPrivateDeploymentModeOverrides()
 }
 
 func loadOptionsFromDatabase() {
@@ -192,6 +194,7 @@ func loadOptionsFromDatabase() {
 			common.SysLog("failed to update option map: " + err.Error())
 		}
 	}
+	applyPrivateDeploymentModeOverrides()
 }
 
 func SyncOptions(frequency int) {
@@ -215,7 +218,11 @@ func UpdateOption(key string, value string) error {
 	// otherwise it will execute Update (with all fields).
 	DB.Save(&option)
 	// Update OptionMap
-	return updateOptionMap(key, value)
+	err := updateOptionMap(key, value)
+	if err == nil {
+		applyPrivateDeploymentModeOverrides()
+	}
+	return err
 }
 
 // UpdateOptionsBulk persists multiple key/value pairs in a single database
@@ -248,7 +255,56 @@ func UpdateOptionsBulk(values map[string]string) error {
 			return err
 		}
 	}
+	applyPrivateDeploymentModeOverrides()
 	return nil
+}
+
+func applyPrivateDeploymentModeOverrides() {
+	if !common.PrivateDeploymentMode {
+		return
+	}
+
+	common.RegisterEnabled = false
+	common.PasswordRegisterEnabled = false
+	common.GitHubOAuthEnabled = false
+	common.LinuxDOOAuthEnabled = false
+	common.WeChatAuthEnabled = false
+	common.TelegramOAuthEnabled = false
+	system_setting.GetDiscordSettings().Enabled = false
+	common.QuotaForNewUser = 0
+	common.QuotaForInviter = 0
+	common.QuotaForInvitee = 0
+	common.TopUpLink = ""
+
+	operation_setting.DemoSiteEnabled = false
+	operation_setting.GetPaymentSetting().ComplianceConfirmed = false
+	operation_setting.PayMethods = []map[string]string{}
+	operation_setting.GetPaymentSetting().AmountDiscount = map[int]float64{}
+	operation_setting.GetCheckinSetting().Enabled = false
+
+	common.OptionMapRWMutex.Lock()
+	defer common.OptionMapRWMutex.Unlock()
+	common.OptionMap["PrivateDeploymentMode"] = "true"
+	common.OptionMap["RegisterEnabled"] = "false"
+	common.OptionMap["PasswordRegisterEnabled"] = "false"
+	common.OptionMap["GitHubOAuthEnabled"] = "false"
+	common.OptionMap["LinuxDOOAuthEnabled"] = "false"
+	common.OptionMap["WeChatAuthEnabled"] = "false"
+	common.OptionMap["TelegramOAuthEnabled"] = "false"
+	common.OptionMap["discord.enabled"] = "false"
+	common.OptionMap["QuotaForNewUser"] = "0"
+	common.OptionMap["QuotaForInviter"] = "0"
+	common.OptionMap["QuotaForInvitee"] = "0"
+	common.OptionMap["TopUpLink"] = ""
+	common.OptionMap["PayMethods"] = "[]"
+	common.OptionMap["DemoSiteEnabled"] = "false"
+	common.OptionMap["payment_setting.compliance_confirmed"] = "false"
+	common.OptionMap["payment_setting.compliance_terms_version"] = ""
+	common.OptionMap["payment_setting.compliance_confirmed_at"] = "0"
+	common.OptionMap["payment_setting.compliance_confirmed_by"] = "0"
+	common.OptionMap["payment_setting.compliance_confirmed_ip"] = ""
+	common.OptionMap["payment_setting.amount_discount"] = "{}"
+	common.OptionMap["checkin_setting.enabled"] = "false"
 }
 
 func updateOptionMap(key string, value string) (err error) {

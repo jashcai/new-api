@@ -81,6 +81,13 @@ func InitEnv() {
 	// Initialize variables from constants.go that were using environment variables
 	DebugEnabled = os.Getenv("DEBUG") == "true"
 	MemoryCacheEnabled = os.Getenv("MEMORY_CACHE_ENABLED") == "true"
+	PrivateDeploymentMode = GetEnvOrDefaultBool("PRIVATE_DEPLOYMENT_MODE", false)
+	if PrivateDeploymentMode {
+		SysLog("private deployment mode enabled")
+	}
+	CORSAllowedOrigins = parseEnvCSV("CORS_ALLOWED_ORIGINS")
+	CORSAllowedHeaders = parseEnvCSV("CORS_ALLOWED_HEADERS")
+	SessionCookieSecure = GetEnvOrDefaultBool("SESSION_COOKIE_SECURE", false)
 	IsMasterNode = os.Getenv("NODE_TYPE") != "slave"
 	NodeName = os.Getenv("NODE_NAME")
 	TLSInsecureSkipVerify = GetEnvOrDefaultBool("TLS_INSECURE_SKIP_VERIFY", false)
@@ -127,6 +134,24 @@ func InitEnv() {
 	SearchRateLimitNum = GetEnvOrDefault("SEARCH_RATE_LIMIT", 10)
 	SearchRateLimitDuration = int64(GetEnvOrDefault("SEARCH_RATE_LIMIT_DURATION", 60))
 	initConstantEnv()
+}
+
+func parseEnvCSV(env string) []string {
+	values := strings.Split(os.Getenv(env), ",")
+	result := make([]string, 0, len(values))
+	seen := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
 }
 
 func initConstantEnv() {

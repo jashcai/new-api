@@ -158,6 +158,15 @@ func Distribute() func(c *gin.Context) {
 				}
 			}
 		}
+		if shouldSelectChannel && modelRequest.Model != "" {
+			userGroup := common.GetContextKeyString(c, constant.ContextKeyUserGroup)
+			usingGroup := common.GetContextKeyString(c, constant.ContextKeyUsingGroup)
+			if err := service.ValidateEnterpriseModelAccess(userGroup, usingGroup, modelRequest.Model); err != nil {
+				abortWithOpenAiMessage(c, http.StatusForbidden, err.Error())
+				return
+			}
+		}
+
 		common.SetContextKey(c, constant.ContextKeyRequestStartTime, time.Now())
 		SetupContextForSelectedChannel(c, channel, modelRequest.Model)
 		c.Next()

@@ -75,6 +75,14 @@ func buildCompletionRatioMetaValue(optionValues map[string]string) string {
 	return string(jsonBytes)
 }
 
+func validateJSONStringOption[T any](value string, label string) error {
+	var parsed T
+	if err := common.UnmarshalJsonStr(value, &parsed); err != nil {
+		return fmt.Errorf("%s JSON 格式无效: %w", label, err)
+	}
+	return nil
+}
+
 func GetOptions(c *gin.Context) {
 	var options []*model.Option
 	optionValues := make(map[string]string)
@@ -324,6 +332,33 @@ func UpdateOption(c *gin.Context) {
 		}
 	case "console_setting.uptime_kuma_groups":
 		err = console_setting.ValidateConsoleSettings(option.Value.(string), "UptimeKumaGroups")
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+	case "enterprise_sso.group_mappings":
+		err = validateJSONStringOption[map[string]string](option.Value.(string), "enterprise_sso.group_mappings")
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+	case "enterprise_policy.group_model_allowlist":
+		err = validateJSONStringOption[map[string][]string](option.Value.(string), "enterprise_policy.group_model_allowlist")
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+	case "enterprise_policy.default_token_models":
+		err = validateJSONStringOption[[]string](option.Value.(string), "enterprise_policy.default_token_models")
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,

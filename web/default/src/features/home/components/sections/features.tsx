@@ -17,14 +17,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import {
-  Zap,
   Shield,
-  Globe,
   Code,
   Gauge,
   DollarSign,
   Users,
-  HeartHandshake,
+  ClipboardCheck,
+  Route,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { AnimateInView } from '@/components/animate-in-view'
@@ -38,21 +37,25 @@ export function Features(_props: FeaturesProps) {
 
   const features = [
     {
-      id: 'fast',
+      id: 'governance',
       num: '01',
-      title: t('Lightning Fast'),
+      title: t('Model governance'),
       desc: t(
-        'Optimized network architecture ensures millisecond response times'
+        'Route teams to approved models with group policies and default token scopes'
       ),
       span: 'md:col-span-2',
-      icon: <Zap className='size-4 text-blue-400' />,
+      icon: <Shield className='size-4 text-emerald-400' />,
       visual: (
         <div className='mt-4 grid grid-cols-3 gap-2'>
-          {['OpenAI', 'Claude', 'Gemini', 'DeepSeek', 'Qwen', 'Llama'].map(
-            (name) => (
+          {['R&D', 'Ops', 'Finance', 'Legal', 'Support', 'Admin'].map(
+            (name, index) => (
               <div
                 key={name}
-                className='border-border/30 bg-muted/20 text-muted-foreground flex items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors duration-300 hover:border-blue-500/30 hover:bg-blue-500/5'
+                className={`border-border/30 bg-muted/20 text-muted-foreground flex items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors duration-300 ${
+                  index < 3
+                    ? 'hover:border-emerald-500/30 hover:bg-emerald-500/5'
+                    : 'hover:border-sky-500/30 hover:bg-sky-500/5'
+                }`}
               >
                 {name}
               </div>
@@ -62,11 +65,11 @@ export function Features(_props: FeaturesProps) {
       ),
     },
     {
-      id: 'secure',
+      id: 'security',
       num: '02',
-      title: t('Secure & Reliable'),
+      title: t('Private by default'),
       desc: t(
-        'Enterprise-grade security with comprehensive permission management'
+        'Keep provider keys, OAuth policies, and deployment options inside your network'
       ),
       span: 'md:col-span-1',
       icon: <Shield className='size-4 text-emerald-400' />,
@@ -99,15 +102,15 @@ export function Features(_props: FeaturesProps) {
       ),
     },
     {
-      id: 'global',
+      id: 'routing',
       num: '03',
-      title: t('Global Coverage'),
-      desc: t('Multi-region deployment for stable global access'),
+      title: t('Reliable routing'),
+      desc: t('Balance traffic across channels with retry, rate limits, and health-aware routing'),
       span: 'md:col-span-1',
-      icon: <Globe className='size-4 text-violet-400' />,
+      icon: <Route className='size-4 text-sky-400' />,
       visual: (
         <div className='mt-4 space-y-2'>
-          {[t('Load Balancing'), t('Rate Limiting'), t('Cost Tracking')].map(
+          {[t('Load Balancing'), t('Rate Limiting'), t('Fallback Routing')].map(
             (step, i) => (
               <div key={step} className='flex items-center gap-2'>
                 <div
@@ -130,8 +133,8 @@ export function Features(_props: FeaturesProps) {
     {
       id: 'developer',
       num: '04',
-      title: t('Developer Friendly'),
-      desc: t('Compatible API routes for common AI application workflows'),
+      title: t('Developer ready'),
+      desc: t('Expose compatible API routes so internal apps can migrate without bespoke SDK work'),
       span: 'md:col-span-2',
       icon: <Code className='size-4 text-amber-400' />,
       visual: (
@@ -158,23 +161,23 @@ export function Features(_props: FeaturesProps) {
   const additionalFeatures = [
     {
       icon: <Gauge className='size-5' strokeWidth={1.5} />,
-      title: t('High Performance'),
-      desc: t('Support for high concurrency with automatic load balancing'),
+      title: t('Operational visibility'),
+      desc: t('Monitor latency, errors, token usage, and channel health'),
     },
     {
       icon: <DollarSign className='size-5' strokeWidth={1.5} />,
-      title: t('Transparent Billing'),
-      desc: t('Pay-as-you-go with real-time usage monitoring'),
+      title: t('Cost control'),
+      desc: t('Track usage and enforce quotas before spend drifts'),
     },
     {
       icon: <Users className='size-5' strokeWidth={1.5} />,
-      title: t('Team Collaboration'),
-      desc: t('Multi-user management with flexible permission allocation'),
+      title: t('Team administration'),
+      desc: t('Manage users, groups, roles, and enterprise sign-in'),
     },
     {
-      icon: <HeartHandshake className='size-5' strokeWidth={1.5} />,
-      title: t('Open Source'),
-      desc: t('Community driven, self-hosted, and extensible'),
+      icon: <ClipboardCheck className='size-5' strokeWidth={1.5} />,
+      title: t('Audit readiness'),
+      desc: t('Preserve action and usage trails for internal reviews'),
     },
   ]
 
@@ -183,12 +186,12 @@ export function Features(_props: FeaturesProps) {
       <div className='mx-auto max-w-6xl'>
         <AnimateInView className='mb-16 max-w-lg'>
           <p className='text-muted-foreground mb-3 text-xs font-medium tracking-widest uppercase'>
-            {t('Core Features')}
+            {t('Enterprise control plane')}
           </p>
           <h2 className='text-2xl leading-tight font-bold tracking-tight md:text-3xl'>
-            {t('Built for developers,')}
+            {t('Govern access,')}
             <br />
-            {t('designed for scale')}
+            {t('operate with confidence')}
           </h2>
         </AnimateInView>
 

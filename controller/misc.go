@@ -51,6 +51,7 @@ func GetStatus(c *gin.Context) {
 	data := gin.H{
 		"version":                     common.Version,
 		"start_time":                  common.StartTime,
+		"private_deployment_mode":     common.PrivateDeploymentMode,
 		"email_verification":          common.EmailVerificationEnabled,
 		"github_oauth":                common.GitHubOAuthEnabled,
 		"github_client_id":            common.GitHubClientId,
@@ -109,6 +110,8 @@ func GetStatus(c *gin.Context) {
 		"oidc_enabled":                system_setting.GetOIDCSettings().Enabled,
 		"oidc_client_id":              system_setting.GetOIDCSettings().ClientId,
 		"oidc_authorization_endpoint": system_setting.GetOIDCSettings().AuthorizationEndpoint,
+		"enterprise_sso_enabled":      system_setting.GetEnterpriseSSOSettings().Enabled,
+		"enterprise_policy_enabled":   system_setting.GetEnterprisePolicySettings().Enabled,
 		"passkey_login":               passkeySetting.Enabled,
 		"passkey_display_name":        passkeySetting.RPDisplayName,
 		"passkey_rp_id":               passkeySetting.RPID,
