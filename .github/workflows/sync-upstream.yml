@@ -1,0 +1,61 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    # Runs every 6 hours (you can change this)
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      sync_test_mode:
+        description: 'Test mode (do not push)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync-upstream:
+    runs-on: ubuntu-latest
+    name: Sync latest commits from upstream repo
+
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/QuantumNous/new-api.git
+          git fetch upstream main
+
+      - name: Check for new commits
+        id: check
+        run: |
+          NEW_COMMITS=$(git rev-list --count HEAD..upstream/main)
+          echo "new_commits=$NEW_COMMITS" >> $GITHUB_OUTPUT
+          echo "New commits behind upstream: $NEW_COMMITS"
+
+      - name: Merge upstream changes
+        if: steps.check.outputs.new_commits > 0 && inputs.sync_test_mode != true
+        run: |
+          git merge upstream/main --no-edit -m "sync: merge upstream changes ($(date +%Y-%m-%d))"
+
+      - name: Push to fork
+        if: steps.check.outputs.new_commits > 0 && inputs.sync_test_mode != true
+        run: |
+          git push origin main
+
+      - name: Test mode output
+        if: inputs.sync_test_mode == true
+        run: |
+          echo "Test mode enabled. No push performed."
+          echo "Would merge ${{ steps.check.outputs.new_commits }} commits."
